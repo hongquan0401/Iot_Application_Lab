@@ -24,4 +24,8 @@
 #define D12 19
 #define D13 18
 
+// Timing defines
+#define delay_toggle_led 1000
+#define delay_read_adc 1000
+
 #endif
