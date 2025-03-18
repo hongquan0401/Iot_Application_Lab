@@ -27,5 +27,7 @@
 // Timing defines
 #define delay_toggle_led 1000
 #define delay_read_adc 1000
+#define I2C_clockRate 400000
+#define delay_DHT20_read 2000
 
 #endif
