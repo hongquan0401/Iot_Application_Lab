@@ -36,12 +36,12 @@ DHT20 dht20;
 void readDHT20(void *pvParam)
 {
   vTaskDelay(pdMS_TO_TICKS(1000));
-
+  DHT20* dht = (DHT20*)pvParam;
   uint8_t count = 0;
   while (true)
   {
       // READ DATA
-      int status = dht20.read();
+      int status = dht->read();
       if (count % 5 == 0)
       {
         count = 0;
@@ -53,9 +53,10 @@ void readDHT20(void *pvParam)
       // Print to Serial
       Serial.print("DHT20 \t");
       //  DISPLAY DATA, sensor has only one decimal.
-      Serial.print(dht20.getHumidity(), 1);
+      Serial.print(dht->getHumidity(), 1);
+      String a(dht->getHumidity(), 1);
       Serial.print("\t\t");
-      Serial.print(dht20.getTemperature(), 1);
+      Serial.print(dht->getTemperature(), 1);
       Serial.print("\t\t");
       switch (status)
       {
@@ -88,7 +89,6 @@ void readDHT20(void *pvParam)
     // }
     vTaskDelay(pdMS_TO_TICKS(delay_DHT20_read));
   }
-  // dht = nullptr;
 }
 void setup()
 {
@@ -98,7 +98,8 @@ void setup()
   pinMode(A0, OUTPUT); // For LED
   // pinMode(A1, INPUT); // For DHT11 ...
   Wire.begin(21, 22); // For I2C DHT20
-  if (!dht20.begin()) {
+  DHT20* dht = new DHT20(&Wire);
+  if (!dht->begin()) {
     Serial.println("Failed to initialize DHT20 sensor!");
     while (1);
   }
@@ -106,7 +107,8 @@ void setup()
   delay(2000);
 
   // Add task
-  xTaskCreate(readDHT20, "Read DHT20", 1024*4, nullptr, 1, nullptr);
+  xTaskCreate(readDHT20, "dddd", 4096, dht, 1, nullptr);
+  // xTaskCreate(readDHT20, "Read DHT20", 1024*4, nullptr, 1, nullptr);
   // xTaskCreate(sensorLight, "Read Light Sensor", 4096, nullptr, 1, nullptr);
   xTaskCreate(ledToggle, "Blinky Led", 4096, nullptr, 0, nullptr);
   }
