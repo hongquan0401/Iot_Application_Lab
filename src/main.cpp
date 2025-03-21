@@ -31,8 +31,6 @@ void sensorLight(void *pvParam) {
   }
 }
 
-DHT20 dht20;
-
 void readDHT20(void *pvParam)
 {
   vTaskDelay(pdMS_TO_TICKS(1000));
