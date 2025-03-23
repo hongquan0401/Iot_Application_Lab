@@ -29,5 +29,17 @@
 #define delay_read_adc 1000
 #define I2C_clockRate 400000
 #define delay_DHT20_read 2000
+#define delay_connect 1000
 
+// MQTT
+#define MQTT_PORT 1883
+#define TOKEN_GATEWAY "tvr3qhvth110c3h857q3"
+#define MQTT_SERVER "app.coreiot.io"
+#define delay_mqtt 100
+#define MQTT_TELEMETRY "v1/devices/me/telemetry"
+
+// WiFi
+#define WIFI_SSID "22-08"
+#define WIFI_PASS "414414a2"
+#define delay_connect_wifi 5000
 #endif
