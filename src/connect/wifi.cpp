@@ -8,11 +8,11 @@ void reconnectMQTT()
 {
     while (!client.connected())
     {
-        Serial.print("Connecting to MQTT...");
+        Serial.print("Connecting to MQTT...\n");
         String clientID = "f74f6c80-07c3-11f0-a887-6d1a184f2bb5";
         if (client.connect(clientID.c_str(), TOKEN_GATEWAY, ""))
         {
-            Serial.println("MQTT reconnect success.");
+            Serial.println("MQTT connect success.");
         }
         else{
             Serial.print("MQTT connection failed, rc=");
@@ -81,7 +81,8 @@ void taskWifi(void* pvParams)
 
     Serial.println("[INFO] WiFi Connected!");
     Serial.print("IP Address: ");
-    Serial.println(String(WiFi.localIP()));
+    IPAddress ip = WiFi.localIP();
+    Serial.printf("%d.%d.%d.%d\n", ip[0], ip[1], ip[2], ip[3]);
 
     while (true)
     {

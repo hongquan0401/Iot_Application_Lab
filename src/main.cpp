@@ -16,14 +16,12 @@ void setup()
     while (1);
   }
   Serial.println("DHT20 initialized successfully.");
+  xTaskCreate(taskWifi, "Wifi", 4096, nullptr, 0, nullptr);
+  xTaskCreate(taskMQTT, "MQTT", 4096, nullptr, 0, nullptr);
   delay(2000);
 
   // Add task
-  xTaskCreate(taskWifi, "Wifi", 4096, nullptr, 0, nullptr);
-  xTaskCreate(taskMQTT, "MQTT", 4096, nullptr, 1, nullptr);
   xTaskCreate(readDHT20, "dddd", 4096, dht, 0, nullptr);
-  // xTaskCreate(readDHT20, "Read DHT20", 1024*4, nullptr, 1, nullptr);
-  // xTaskCreate(sensorLight, "Read Light Sensor", 4096, nullptr, 1, nullptr);
   xTaskCreate(ledToggle, "Blinky Led", 4096, nullptr, 2, nullptr);
   }
 

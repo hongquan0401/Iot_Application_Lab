@@ -47,41 +47,46 @@ void readDHT20(void *pvParam)
         Serial.println("Type\tHumidity (%)\tTemp (°C)\tStatus");
       }
       count++;
-// 
       // Print to Serial
-      Serial.print("DHT20 \t");
-      //  DISPLAY DATA, sensor has only one decimal.
-      Serial.print(dht->getHumidity(), 1);
-      String a(dht->getHumidity(), 1);
-      Serial.print("\t\t");
-      Serial.print(dht->getTemperature(), 1);
-      Serial.print("\t\t");
-      switch (status)
+      if (status == DHT20_OK)
       {
-        case DHT20_OK:
-          Serial.print("OK");
-          break;
-        case DHT20_ERROR_CHECKSUM:
-          Serial.print("Checksum error");
-          break;
-        case DHT20_ERROR_CONNECT:
-          Serial.print("Connect error");
-          break;
-        case DHT20_MISSING_BYTES:
-          Serial.print("Missing bytes");
-          break;
-        case DHT20_ERROR_BYTES_ALL_ZERO:
-          Serial.print("All bytes read zero");
-          break;
-        case DHT20_ERROR_READ_TIMEOUT:
-          Serial.print("Read time out");
-          break;
-        case DHT20_ERROR_LASTREAD:
-          Serial.print("Error read too fast");
-          break;
-        default:
-          Serial.print("Unknown error");
-          break;
+        Serial.print("DHT20 \t");
+        //  DISPLAY DATA, sensor has only one decimal.
+        Serial.print(dht->getHumidity(), 1);
+        String a(dht->getHumidity(), 1);
+        Serial.print("\t\t");
+        Serial.print(dht->getTemperature(), 1);
+        Serial.print("\t\t");
+      }
+      else
+      {
+        switch (status)
+        {
+          case DHT20_ERROR_CHECKSUM:
+            Serial.print("Checksum error");
+            break;
+          case DHT20_ERROR_CONNECT:
+            Serial.print("Connect error");
+            break;
+          case DHT20_MISSING_BYTES:
+            Serial.print("Missing bytes");
+            break;
+          case DHT20_ERROR_BYTES_ALL_ZERO:
+            Serial.print("All bytes read zero");
+            break;
+          case DHT20_ERROR_READ_TIMEOUT:
+            Serial.print("Read time out");
+            break;
+          case DHT20_ERROR_LASTREAD:
+            Serial.print("Error read too fast");
+            break;
+          default:
+            Serial.print("Unknown error");
+            break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(delay_DHT20_read));
+        Serial.println();
+        continue;
       }
       Serial.println();
     // Seriallize data 
