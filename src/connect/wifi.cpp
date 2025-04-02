@@ -56,11 +56,13 @@ void callback(char* topic, byte* payload, unsigned int length)
         {
             if (state) digitalWrite(A0, HIGH);
             else digitalWrite(A0, LOW);
+            // doc for RPC response
             doc["method"] = String("setState");
             doc["params"] = state;
         }
         else if (method == "LEDState")
         {
+            // doc for RPC response
             doc["method"] = String("LEDState");
             doc["params"] = (digitalRead(A0)? true : false);
         }
