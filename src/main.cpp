@@ -18,11 +18,19 @@ void setup()
   Serial.println("DHT20 initialized successfully.");
   xTaskCreate(taskWifi, "Wifi", 4096, nullptr, 0, nullptr);
   xTaskCreate(taskMQTT, "MQTT", 4096, nullptr, 0, nullptr);
+  // StaticJsonDocument<300> jsonDoc;
+  // jsonDoc["LEDState"] = String(digitalRead(A0));
+  // String data_pub;
+  // serializeJson(jsonDoc, data_pub);
+  // publishData(MQTT_TELEMETRY, data_pub);
+  // subcriptData();
   delay(2000);
 
   // Add task
+  // xTaskCreate(ledUpdate, "led update", 2048, nullptr, 0, nullptr);
   xTaskCreate(readDHT20, "dddd", 4096, dht, 0, nullptr);
-  xTaskCreate(ledToggle, "Blinky Led", 4096, nullptr, 2, nullptr);
+  // xTaskCreate(ledToggle, "Blinky Led", 4096, nullptr, 2, nullptr);
+  // xTaskCreate(ledControl, "led", 2048, nullptr, 0, nullptr);
   }
 
   void loop()

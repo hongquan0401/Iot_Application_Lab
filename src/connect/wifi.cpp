@@ -13,6 +13,8 @@ void reconnectMQTT()
         if (client.connect(clientID.c_str(), TOKEN_GATEWAY, ""))
         {
             Serial.println("MQTT connect success.");
+            if (client.subscribe(MQTT_SUBCRIBE_TOPIC)) Serial.println("Subcribe success.");
+            else Serial.println("Fail.");
         }
         else{
             Serial.print("MQTT connection failed, rc=");
@@ -21,6 +23,55 @@ void reconnectMQTT()
         vTaskDelay(pdMS_TO_TICKS(5000));
     }   
 }
+
+void callback(char* topic, byte* payload, unsigned int length)
+{
+    Serial.printf("[MQTT Message Arrive]: %s\n", topic);
+    // v1/devices/me/rpc/request/15
+    String str_topic(topic);
+    // get last idx
+    int idx = str_topic.lastIndexOf('/');
+    String requestID = str_topic.substring(idx + 1);
+    String msg;
+    for (unsigned int i = 0; i < length; i++)
+    {
+        msg += (char)payload[i];
+    }
+    Serial.print("[MQTT] Payload: ");
+    Serial.println(msg);
+    StaticJsonDocument<100> docRequest;
+    DeserializationError error = deserializeJson(docRequest, msg);
+    if (error)
+    {
+        Serial.print("[ERROR] deserializeJson() failed: ");
+        Serial.println(error.f_str());
+        return;
+    }
+    String method = docRequest["method"].as<String>();
+    bool state = docRequest["params"];
+    StaticJsonDocument<100> doc;
+    if (method == "setState")
+    {
+        if (state) digitalWrite(A0, HIGH);
+        else digitalWrite(A0, LOW);
+        doc["method"] = String("setState");
+        doc["params"] = state;
+    }
+    else
+    {
+        doc["method"] = String("LEDState");
+        doc["params"] = (digitalRead(A0)? true : false);
+    }
+
+    // Serialize Json to publish (ACK)
+    doc["LEDState"] = state;
+    String data;
+    serializeJson(doc, data);
+    String mqtt_topic = String("v1/devices/me/rpc/response/" + requestID);
+    publishData(mqtt_topic, data);
+    return;
+}
+
 void taskMQTT(void* pvParams)
 {   
     // Check wifi connection
@@ -30,16 +81,19 @@ void taskMQTT(void* pvParams)
     }
     client.setServer(MQTT_SERVER, MQTT_PORT);
     client.setKeepAlive(30);
+    client.setCallback(callback);
+    Serial.println("check point");
+    
     Serial.println("MQTT connetion success");
     while (true)
-  {
-    if (!client.connected())
     {
-      reconnectMQTT();
+        if (!client.connected())
+        {
+            reconnectMQTT();
+        }
+        client.loop();
+        vTaskDelay(delay_mqtt / portTICK_PERIOD_MS);
     }
-    client.loop();
-    vTaskDelay(delay_mqtt / portTICK_PERIOD_MS);
-  }
 }
 bool publishData(const String &feedName, String message)
 {
@@ -50,6 +104,7 @@ bool publishData(const String &feedName, String message)
 
     if(client.publish(topic.c_str(), message.c_str(), 1))
     {
+        Serial.println(topic);
         Serial.print("Publish success: ");
         Serial.println(message);
         return true;
@@ -60,7 +115,17 @@ bool publishData(const String &feedName, String message)
         return false;
     }
 }
-
+bool subcriptData()
+{
+    if (client.subscribe(MQTT_TELEMETRY))
+    {
+        Serial.println("Subcripted success.");
+        Serial.println();
+        return true;
+    }
+    else Serial.println("Subcripted Failed.");
+    return false;
+}
 // Connect Wifi function
 void taskWifi(void* pvParams)
 {

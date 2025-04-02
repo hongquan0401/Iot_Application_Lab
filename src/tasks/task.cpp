@@ -2,6 +2,22 @@
 #include "../connect/wifi.hpp"
 
 int flag = 0;
+
+void ledUpdate(void* pvParams)
+{
+  while (1)
+  {
+    bool state = true;
+    if (!digitalRead(A0)) state = false; 
+    StaticJsonDocument<100> doc;
+    doc["LEDState"] = state;
+    String ledData;
+    serializeJson(doc, ledData);
+    publishData(MQTT_ATTRIBUTES, ledData);
+    vTaskDelay(pdMS_TO_TICKS(led_callback));
+  }
+}
+
 void ledToggle(void *pvParam)
 {
   while (true)
@@ -35,7 +51,7 @@ void readDHT20(void *pvParam)
 {
   vTaskDelay(pdMS_TO_TICKS(1000));
   DHT20* dht = (DHT20*)pvParam;
-  uint8_t count = 0;
+  uint8_t count = 1;
   while (true)
   {
       // READ DATA
@@ -57,6 +73,7 @@ void readDHT20(void *pvParam)
         Serial.print("\t\t");
         Serial.print(dht->getTemperature(), 1);
         Serial.print("\t\t");
+        Serial.print("OK");
       }
       else
       {
@@ -93,6 +110,7 @@ void readDHT20(void *pvParam)
     StaticJsonDocument<300> jsonDoc;
     jsonDoc["humidity"] = String(dht->getHumidity(), 2);
     jsonDoc["temperature"] = String(dht->getTemperature(), 2);
+    // jsonDoc["LEDState"] = String(digitalRead(A0));
     String data_pub;
     serializeJson(jsonDoc, data_pub);
     

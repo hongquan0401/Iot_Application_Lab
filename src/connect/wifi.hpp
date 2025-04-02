@@ -7,6 +7,7 @@ extern PubSubClient client;
 void reconnectMQTT();
 void taskMQTT(void* pvParams);
 bool publishData(const String &feedName, String message);
+bool subcriptData();
 
 // Connect Wifi function
 void taskWifi(void* pvParams);
