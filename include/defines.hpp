@@ -43,7 +43,7 @@
 #define MAX_MSG_SIZE 1024U
 
 // WiFi
-#define WIFI_SSID "22-08"
-#define WIFI_PASS "414414a2"
+#define WIFI_SSID "Nguyen Son"
+#define WIFI_PASS "68686868@"
 #define delay_connect_wifi 5000
 #endif

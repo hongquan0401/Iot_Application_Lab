@@ -48,7 +48,6 @@ void callback(char* topic, byte* payload, unsigned int length)
         return;
     }
     String method = docRequest["method"].as<String>();
-    StaticJsonDocument<100> doc;
     if (method != "SCH_LED")
     {
         bool state = docRequest["params"];
@@ -56,15 +55,16 @@ void callback(char* topic, byte* payload, unsigned int length)
         {
             if (state) digitalWrite(A0, HIGH);
             else digitalWrite(A0, LOW);
-            // doc for RPC response
-            doc["method"] = String("setState");
-            doc["params"] = state;
         }
         else if (method == "LEDState")
         {
             // doc for RPC response
-            doc["method"] = String("LEDState");
-            doc["params"] = (digitalRead(A0)? true : false);
+            bool data = digitalRead(A0)? true : false;
+            String mqtt_topic = String("v1/devices/me/rpc/response/" + requestID);
+            String val;
+            data ? val = "true" : val = "false";
+            publishData(mqtt_topic, val);
+            return;
         }
     }
     if (method == "SCH_LED")
@@ -75,12 +75,6 @@ void callback(char* topic, byte* payload, unsigned int length)
         Serial.println("Do SCH request success. (Thay cho Response RPC)");
         return;
     }
-    // Serialize Json to publish (ACK)
-    String data;
-    serializeJson(doc, data);
-    String mqtt_topic = String("v1/devices/me/rpc/response/" + requestID);
-    publishData(mqtt_topic, data);
-    return;
 }
 
 void taskMQTT(void* pvParams)
