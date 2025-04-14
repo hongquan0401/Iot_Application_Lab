@@ -3,6 +3,7 @@
 
 void setup() {
   Serial.begin(SERIAL_DEBUG_BAUD);
+  pinMode(LED_PIN, OUTPUT);
 
   xTaskCreate(connectWifi, "Connect Wifi", 4096, NULL, 1, NULL);
   xTaskCreate(connectThingsBoard, "Connect ThingsBoard", 4096, NULL, 1, NULL);

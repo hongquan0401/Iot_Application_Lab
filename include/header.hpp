@@ -1,4 +1,4 @@
-#define LED_PIN GPIO_NUM_12
+#define LED_PIN GPIO_NUM_2
 #define SDA_PIN GPIO_NUM_21
 #define SCL_PIN GPIO_NUM_22
 
