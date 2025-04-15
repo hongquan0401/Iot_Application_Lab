@@ -20,7 +20,7 @@ constexpr char WIFI_SSID[] = "KN";
 constexpr char WIFI_PASSWORD[] = "nganxinhdep";
 
 // Thingsboard parameter
-constexpr char TOKEN[] = "AhbeGa4zPtrjwGYjomrq";
+constexpr char TOKEN[] = "PoiA8eh0y9AdMMZWdUtI";
 constexpr char THINGSBOARD_SERVER[] = "app.coreiot.io";
 constexpr uint16_t THINGSBOARD_PORT = 1883U;
 constexpr uint32_t MAX_MESSAGE_SIZE = 1024U;
@@ -29,7 +29,7 @@ constexpr int16_t telemetrySendInterval = 10000U;
 constexpr uint32_t SERIAL_DEBUG_BAUD = 115200U;
 
 // OTA update parameter
-constexpr char CURRENT_FIRMWARE_TITLE[] = "IoT_LAB3_Firmware";
+constexpr char CURRENT_FIRMWARE_TITLE[] = "ESP32_OTA";
 constexpr char CURRENT_FIRMWARE_VERSION[] = "1.0";
 // Maximum amount of retries we attempt to download each firmware chunck over MQTT
 constexpr uint8_t FIRMWARE_FAILURE_RETRIES = 12U;
