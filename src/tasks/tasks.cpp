@@ -1,13 +1,20 @@
 #include <header.hpp>
 #include "tasks/tasks.hpp"
 
-constexpr int16_t telemetrySendInterval = 10000U;
 
 WiFiClient wifiClient;
 Arduino_MQTT_Client mqttClient(wifiClient);
-ThingsBoard tb(mqttClient, MAX_MESSAGE_SIZE);
+OTA_Firmware_Update<> ota;
+const std::array<IAPI_Implementation*, 1U> apis = {
+    &ota
+};
+// Initialize ThingsBoard instance with the maximum needed buffer size
+ThingsBoard tb(mqttClient, MAX_MESSAGE_RECEIVE_SIZE, MAX_MESSAGE_SEND_SIZE, Default_Max_Stack_Size, apis);
 
-DHT20 dht20;
+Espressif_Updater<> updater;
+
+bool currentFWSent = false;
+bool updateRequestSent = false;
 
 void connectWifi (void *pvParameters) {
   Serial.println("Connecting to Wifi...");
@@ -64,30 +71,41 @@ void sendTelemetryData (void *pvParameters){
   }
 }
 
-RPC_Response setLedState(const RPC_Data &data) {
-  Serial.println("Received Switch state");
-  bool newState = data;
-  Serial.print("Switch state change: ");
-  Serial.println(newState);
-  digitalWrite(LED_PIN, newState);
-  return RPC_Response("setLedValue", newState);
+
+void update_starting_callback() {
+  // Nothing to do
+}
+void finished_callback(const bool & success) {
+  if (success) {
+    Serial.println("Done, Reboot now");
+    esp_restart();
+    return;
+  }
+  Serial.println("Downloading firmware failed");
 }
 
-const std::array<RPC_Callback, 1U> callbacks = {
-RPC_Callback{ "setLedValue", setLedState }
-};
+void progress_callback(const size_t & current, const size_t & total) {
+  Serial.printf("Progress %.2f%%\n", static_cast<float>(current * 100U) / total);
+}
 
-void subscribeRPC (void *pvParameters) {
-  Serial.println("Subscribing for RPC...");
-  while (!tb.RPC_Subscribe(callbacks.cbegin(), callbacks.cend())) {
-    Serial.print(".");
-    vTaskDelay(1000 / portTICK_PERIOD_MS);  
-  }
-
-  Serial.println("Subscribe for RPC successfully!");
-
+void OTAupdate (void *pvParameters) {
   while (1) {
+    if (!currentFWSent) {
+      currentFWSent = ota.Firmware_Send_Info(CURRENT_FIRMWARE_TITLE, CURRENT_FIRMWARE_VERSION);
+    }
+  
+    if (!updateRequestSent) {
+      Serial.println("Firwmare Update...");
+      const OTA_Update_Callback callback(CURRENT_FIRMWARE_TITLE, CURRENT_FIRMWARE_VERSION, &updater, &finished_callback, &progress_callback, &update_starting_callback, FIRMWARE_FAILURE_RETRIES, FIRMWARE_PACKET_SIZE);
+      // See https://thingsboard.io/docs/user-guide/ota-updates/
+      // to understand how to create a new OTA pacakge and assign it to a device so it can download it.
+      // Sending the request again after a successfull update will automatically send the UPDATED firmware state,
+      // because the assigned firmware title and version on the cloud and the firmware version and title we booted into are the same.
+      updateRequestSent = ota.Start_Firmware_Update(callback);
+    }
+  
     tb.loop();
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
+
 }
